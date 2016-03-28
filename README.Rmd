@@ -1,5 +1,11 @@
-# Tiding the *Human Activity Recognition Using Smartphones* Dataset
-I. Llatas  
+---
+title: "Tiding the *Human Activity Recognition Using Smartphones* Dataset"
+author: "I. Llatas"
+Created: "March 23, 2016"
+output: 
+  html_document: 
+    keep_md: yes
+---
 
 #Sypnopsis#
 
@@ -20,16 +26,9 @@ With this assignment we are tiding the dataset provided in [1].  For doing so, i
 
 Load libraries, Download zip file and save the unzipped files
 
+```{r}
 
-```r
 library(tidyr,warn.conflicts = FALSE,verbose=FALSE)
-```
-
-```
-## Warning: package 'tidyr' was built under R version 3.2.4
-```
-
-```r
 library(plyr,warn.conflicts=FALSE,verbose=FALSE)
 library(dplyr,warn.conflicts = FALSE,verbose=FALSE)
 library(data.table,warn.conflicts=FALSE,verbose=FALSE)
@@ -44,6 +43,7 @@ if(!file.exists("./data")){
         file.rename("./data/UCI HAR Dataset","./data/ucihar")
         file.remove("UCI HAR Dataset")  #tyding the workspace
 }
+
 ```
 
 
@@ -60,8 +60,7 @@ Read into R and make 2 data tables, one for each set (train, test).
  . activity name:  character variable with *natural language* names for each activity
 
 
-
-```r
+```{r}
 features<-read.table("data/ucihar/features.txt",stringsAsFactors = FALSE)
 
 activities<-read.table("data/ucihar/activity_labels.txt",stringsAsFactors = FALSE)
@@ -94,21 +93,20 @@ join1.f<- function(set,id,y,X,act=activities,feat=features) {
 
 reducedTest<-join1.f("test",idtest,ytest,Xtest)
 reducedTrain<-join1.f("train",idtrain,ytrain,Xtrain)
+
 ```
 
 ## Process##
 
 1.- *Merges the training and the test sets to create one data set* into one data.frame called mergedHAR
 
-
-```r
+```{r}
 mergedHAR<-bind_rows(reducedTrain,reducedTest)
 ```
 
 2.- Extracts only the measurements on the mean and standard deviation for each measurement. To do this, ones needs to create a vector of names that match either the strings "mean()" or "sd()"
 
-
-```r
+```{r}
 mean.names<-grep("mean\\(\\)",names(mergedHAR),value=TRUE)
 std.names<-grep("std\\(\\)",names(mergedHAR),value=TRUE)
 reducedNames<-c("set","subject.id","act.code", "act.name",mean.names,std.names)
@@ -120,13 +118,13 @@ reducedMergedHAR<-select(mergedHAR,one_of(reducedNames))
 
 4.- For the final step  (step 5) it is needed to  creates a second, independent tidy data set with the average of each variable for each activity and each subject in the data.table created in steps 1 to 4. The names of the data table have been modified to include a **xbarof_** string, to be informative.  
 This data set is then stored in a *txt* file, called "summarizedHAR.txt"
-
-```r
+```{r}
 summarizedHAR<- reducedMergedHAR%>% group_by(subject.id,act.name,set)%>%summarize_each(funs(mean))
 
 names(summarizedHAR)[5:ncol(summarizedHAR)]<-paste("xbarof_",names(summarizedHAR)[5:ncol(summarizedHAR)],sep="")
 
 write.table(summarizedHAR,file="summarizedHAR.txt",row.names=FALSE)
+
 ```
 
 
